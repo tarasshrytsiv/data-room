@@ -20,21 +20,24 @@ export function CreateRoomDialog() {
   async function handleCreate() {
     if (!name.trim()) return
     setLoading(true)
-    await apiFetch<DataRoomDto>('/data-rooms', {
-      method: 'POST',
-      body: JSON.stringify({ name: name.trim() }),
-    })
-    setOpen(false)
-    setName('')
-    setLoading(false)
-    router.refresh()
+    try {
+      await apiFetch<DataRoomDto>('/data-rooms', {
+        method: 'POST',
+        body: JSON.stringify({ name: name.trim() }),
+      })
+      setOpen(false)
+      setName('')
+      router.refresh()
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger
         render={
-          <Button className="cursor-pointer bg-[var(--color-accent)] hover:bg-orange-700" />
+          <Button className="cursor-pointer bg-[var(--color-accent)] hover:bg-orange-700 transition-colors duration-150 ease-out" />
         }
       >
         <Plus size={16} className="mr-2" />
