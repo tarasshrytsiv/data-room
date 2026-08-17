@@ -41,7 +41,7 @@ model Folder {
   updatedAt  DateTime @updatedAt
 
   dataRoom DataRoom @relation(fields: [dataRoomId], references: [id], onDelete: Cascade)
-  parent   Folder?  @relation("FolderTree", fields: [parentId], references: [id])
+  parent   Folder?  @relation("FolderTree", fields: [parentId], references: [id], onDelete: Cascade)
   children Folder[] @relation("FolderTree")
   files    File[]
   shares   Share[]

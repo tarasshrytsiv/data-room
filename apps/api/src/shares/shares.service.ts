@@ -11,6 +11,26 @@ export class SharesService {
       throw new BadRequestException('Must specify dataRoomId, folderId, or fileId')
     }
 
+    if (dto.dataRoomId) {
+      const resource = await this.prisma.dataRoom.findUnique({ where: { id: dto.dataRoomId } })
+      if (!resource) throw new NotFoundException('DataRoom not found')
+      if (resource.ownerId !== sharedById) throw new ForbiddenException()
+    } else if (dto.folderId) {
+      const resource = await this.prisma.folder.findUnique({
+        where: { id: dto.folderId },
+        include: { dataRoom: { select: { ownerId: true } } },
+      })
+      if (!resource) throw new NotFoundException('Folder not found')
+      if (resource.dataRoom.ownerId !== sharedById) throw new ForbiddenException()
+    } else if (dto.fileId) {
+      const resource = await this.prisma.file.findUnique({
+        where: { id: dto.fileId },
+        include: { folder: { include: { dataRoom: { select: { ownerId: true } } } } },
+      })
+      if (!resource) throw new NotFoundException('File not found')
+      if (resource.folder.dataRoom.ownerId !== sharedById) throw new ForbiddenException()
+    }
+
     let sharedWithId: string | undefined
 
     if (dto.type === 'PERMISSIONED' && dto.sharedWithEmail) {
