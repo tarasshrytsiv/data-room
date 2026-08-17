@@ -1,0 +1,14 @@
+import { IsOptional, IsString, MinLength } from 'class-validator'
+
+export class CreateFolderDto {
+  @IsString()
+  @MinLength(1)
+  name: string
+
+  @IsString()
+  dataRoomId: string
+
+  @IsOptional()
+  @IsString()
+  parentId?: string
+}

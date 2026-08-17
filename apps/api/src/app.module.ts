@@ -5,6 +5,7 @@ import { RedisModule } from './redis/redis.module'
 import { StorageModule } from './storage/storage.module'
 import { AuthModule } from './auth/auth.module'
 import { DataRoomsModule } from './data-rooms/data-rooms.module'
+import { FoldersModule } from './folders/folders.module'
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { DataRoomsModule } from './data-rooms/data-rooms.module'
     StorageModule,
     AuthModule,
     DataRoomsModule,
+    FoldersModule,
   ],
 })
 export class AppModule {}
