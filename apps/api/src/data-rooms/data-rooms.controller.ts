@@ -1,10 +1,12 @@
 import {
-  Body, Controller, Delete, Get, Param, Patch, Post, UseGuards,
+  All, Body, Controller, Delete, Get, Param, Patch, Post, UseGuards,
 } from '@nestjs/common'
 import { DataRoomsService } from './data-rooms.service'
 import { CreateDataRoomDto } from './dto/create-data-room.dto'
 import { UpdateDataRoomDto } from './dto/update-data-room.dto'
+import { SearchDto } from './dto/search.dto'
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'
+import { QueryMethodGuard } from '../auth/guards/query-method.guard'
 import { CurrentUser } from '../auth/decorators/current-user.decorator'
 import { User } from '@prisma/client'
 
@@ -36,5 +38,11 @@ export class DataRoomsController {
   @Delete(':id')
   remove(@Param('id') id: string, @CurrentUser() user: User) {
     return this.service.remove(id, user.id)
+  }
+
+  @All(':id/search')
+  @UseGuards(QueryMethodGuard)
+  search(@Param('id') id: string, @Body() dto: SearchDto, @CurrentUser() user: User) {
+    return this.service.search(id, dto, user.id)
   }
 }
