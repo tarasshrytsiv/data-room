@@ -7,6 +7,7 @@ import { AuthModule } from './auth/auth.module'
 import { DataRoomsModule } from './data-rooms/data-rooms.module'
 import { FoldersModule } from './folders/folders.module'
 import { FilesModule } from './files/files.module'
+import { SharesModule } from './shares/shares.module'
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { FilesModule } from './files/files.module'
     DataRoomsModule,
     FoldersModule,
     FilesModule,
+    SharesModule,
   ],
 })
 export class AppModule {}
