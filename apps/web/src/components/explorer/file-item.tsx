@@ -5,6 +5,7 @@ import { FileText, MoreVertical } from 'lucide-react'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { RenameDialog } from '@/components/modals/rename-dialog'
 import { DeleteConfirmDialog } from '@/components/modals/delete-confirm-dialog'
+import { ShareDialog } from '@/components/share/share-dialog'
 import type { FileDto } from '@repo/types'
 
 type Props = {
@@ -23,6 +24,7 @@ function formatBytes(bytes: number): string {
 export function FileItem({ file, onView, onAction, readOnly }: Props) {
   const [renaming, setRenaming] = useState(false)
   const [deleting, setDeleting] = useState(false)
+  const [sharing, setSharing] = useState(false)
 
   return (
     <>
@@ -48,6 +50,7 @@ export function FileItem({ file, onView, onAction, readOnly }: Props) {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem className="cursor-pointer" onClick={() => setRenaming(true)}>Rename</DropdownMenuItem>
+              <DropdownMenuItem className="cursor-pointer" onClick={() => setSharing(true)}>Share</DropdownMenuItem>
               <DropdownMenuItem className="cursor-pointer" variant="destructive" onClick={() => setDeleting(true)}>Delete</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -69,6 +72,11 @@ export function FileItem({ file, onView, onAction, readOnly }: Props) {
         resourceType="file"
         resourceId={file.id}
         resourceName={file.name}
+      />
+      <ShareDialog
+        open={sharing}
+        onClose={() => setSharing(false)}
+        target={{ type: 'file', id: file.id }}
       />
     </>
   )
