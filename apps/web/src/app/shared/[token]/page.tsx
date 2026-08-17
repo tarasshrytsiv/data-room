@@ -1,7 +1,6 @@
 import { notFound } from 'next/navigation'
-import { ViewerDialog } from '@/components/modals/viewer-dialog'
 import { ItemGrid } from '@/components/explorer/item-grid'
-import type { ShareDto, FolderContentsResponse, FileDto } from '@repo/types'
+import type { ShareDto, FolderContentsResponse } from '@repo/types'
 
 type Props = { params: Promise<{ token: string }> }
 
@@ -27,6 +26,7 @@ export default async function SharedPage({ params }: Props) {
       `${process.env.NEXT_PUBLIC_API_URL}/api/v1/files/${share.fileId}/view-url`,
       { cache: 'no-store' },
     )
+    if (!fileRes.ok) notFound()
     const { url } = await fileRes.json() as { url: string }
 
     return (
