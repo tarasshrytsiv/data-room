@@ -1,0 +1,9 @@
+node_modules/
+.env
+.env.local
+.turbo/
+dist/
+.next/
+*.tsbuildinfo
+.claude/
+*.docx
