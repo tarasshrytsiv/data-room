@@ -32,11 +32,13 @@ export function CreateRoomDialog() {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button className="cursor-pointer bg-[var(--color-accent)] hover:bg-orange-700">
-          <Plus size={16} className="mr-2" />
-          New Data Room
-        </Button>
+      <DialogTrigger
+        render={
+          <Button className="cursor-pointer bg-[var(--color-accent)] hover:bg-orange-700" />
+        }
+      >
+        <Plus size={16} className="mr-2" />
+        New Data Room
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
