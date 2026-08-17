@@ -8,7 +8,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'
 import { CurrentUser } from '../auth/decorators/current-user.decorator'
 import { User } from '@prisma/client'
 
-@Controller('api/v1/data-rooms')
+@Controller('data-rooms')
 @UseGuards(JwtAuthGuard)
 export class DataRoomsController {
   constructor(private readonly service: DataRoomsService) {}
