@@ -6,14 +6,16 @@ type Props = {
   folderId: string | null
   token: string
   initialData?: FolderContentsResponse
+  dataRoomId: string
 }
 
-export function ExplorerServer({ roomId, folderId, initialData }: Props) {
+export function ExplorerServer({ roomId, folderId, initialData, dataRoomId }: Props) {
   return (
     <ExplorerClient
       roomId={roomId}
       folderId={folderId}
       initialData={initialData}
+      dataRoomId={dataRoomId}
     />
   )
 }

@@ -29,7 +29,7 @@ export default async function FolderPage({ params }: Props) {
       <div className="mb-6">
         <ExplorerBreadcrumb roomId={roomId} crumbs={data.breadcrumb ?? []} />
       </div>
-      <ExplorerServer roomId={roomId} folderId={folderId} token={session.access_token} initialData={data} />
+      <ExplorerServer roomId={roomId} folderId={folderId} token={session.access_token} initialData={data} dataRoomId={data.folder.dataRoomId} />
     </div>
   )
 }

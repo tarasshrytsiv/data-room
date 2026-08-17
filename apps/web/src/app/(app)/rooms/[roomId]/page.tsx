@@ -22,7 +22,7 @@ export default async function RoomPage({ params }: Props) {
         <h1 className="text-xl font-bold text-[var(--color-foreground)] mb-2">{room.name}</h1>
         <ExplorerBreadcrumb roomId={roomId} crumbs={[]} />
       </div>
-      <ExplorerServer roomId={roomId} folderId={null} token={session.access_token} />
+      <ExplorerServer roomId={roomId} folderId={null} token={session.access_token} dataRoomId={room.id} />
     </div>
   )
 }

@@ -12,9 +12,10 @@ type Props = {
   roomId: string
   folderId: string | null
   initialData?: FolderContentsResponse
+  dataRoomId: string
 }
 
-export function ExplorerClient({ roomId, folderId, initialData }: Props) {
+export function ExplorerClient({ roomId, folderId, initialData, dataRoomId }: Props) {
   const [viewFile, setViewFile] = useState<FileDto | null>(null)
 
   const key = folderId ? `/folders/${folderId}/contents` : null
@@ -27,7 +28,7 @@ export function ExplorerClient({ roomId, folderId, initialData }: Props) {
 
   return (
     <div className="space-y-4">
-      <ExplorerToolbar roomId={roomId} folderId={folderId} onRefresh={() => mutate()} />
+      <ExplorerToolbar roomId={roomId} folderId={folderId} onRefresh={() => mutate()} dataRoomId={dataRoomId} />
       <ItemGrid
         items={data?.items ?? []}
         roomId={roomId}
