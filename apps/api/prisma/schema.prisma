@@ -7,3 +7,108 @@ datasource db {
   url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
 }
+
+model User {
+  id        String   @id
+  email     String   @unique
+  name      String?
+  image     String?
+  createdAt DateTime @default(now())
+
+  dataRooms DataRoom[]
+  shares    Share[]   @relation("SharedBy")
+  accesses  Share[]   @relation("SharedWith")
+}
+
+model DataRoom {
+  id        String   @id @default(cuid())
+  name      String
+  ownerId   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  owner   User     @relation(fields: [ownerId], references: [id])
+  folders Folder[]
+  shares  Share[]
+}
+
+model Folder {
+  id         String   @id @default(cuid())
+  name       String
+  dataRoomId String
+  parentId   String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  dataRoom DataRoom @relation(fields: [dataRoomId], references: [id], onDelete: Cascade)
+  parent   Folder?  @relation("FolderTree", fields: [parentId], references: [id])
+  children Folder[] @relation("FolderTree")
+  files    File[]
+  shares   Share[]
+
+  @@index([dataRoomId])
+  @@index([parentId])
+  @@unique([parentId, name])
+}
+
+model File {
+  id         String   @id @default(cuid())
+  name       String
+  storageKey String
+  mimeType   String
+  size       Int
+  folderId   String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  folder   Folder        @relation(fields: [folderId], references: [id], onDelete: Cascade)
+  shares   Share[]
+  versions FileVersion[]
+
+  @@index([folderId])
+  @@unique([folderId, name])
+}
+
+model FileVersion {
+  id         String   @id @default(cuid())
+  fileId     String
+  storageKey String
+  size       Int
+  createdAt  DateTime @default(now())
+
+  file File @relation(fields: [fileId], references: [id], onDelete: Cascade)
+}
+
+model Share {
+  id           String    @id @default(cuid())
+  type         ShareType
+  token        String    @unique @default(cuid())
+  role         ShareRole @default(VIEWER)
+  dataRoomId   String?
+  folderId     String?
+  fileId       String?
+  sharedById   String
+  sharedWithId String?
+  expiresAt    DateTime?
+  revokedAt    DateTime?
+  createdAt    DateTime  @default(now())
+
+  dataRoom   DataRoom? @relation(fields: [dataRoomId], references: [id], onDelete: Cascade)
+  folder     Folder?   @relation(fields: [folderId], references: [id], onDelete: Cascade)
+  file       File?     @relation(fields: [fileId], references: [id], onDelete: Cascade)
+  sharedBy   User      @relation("SharedBy", fields: [sharedById], references: [id])
+  sharedWith User?     @relation("SharedWith", fields: [sharedWithId], references: [id])
+
+  @@index([token])
+  @@index([sharedWithId])
+}
+
+enum ShareType {
+  PUBLIC
+  PERMISSIONED
+}
+
+enum ShareRole {
+  VIEWER
+  EDITOR
+}
