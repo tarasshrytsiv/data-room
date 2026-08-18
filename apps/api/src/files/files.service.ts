@@ -35,6 +35,25 @@ export class FilesService {
 
   async create(dto: CreateFileDto, userId: string) {
     await this.folders.findOne(dto.folderId, userId)
+
+    const existing = await this.prisma.file.findFirst({
+      where: { folderId: dto.folderId, name: dto.name },
+    })
+
+    if (existing) {
+      const [file] = await this.prisma.$transaction([
+        this.prisma.file.update({
+          where: { id: existing.id },
+          data: { storageKey: dto.storageKey, size: dto.size, mimeType: dto.mimeType },
+        }),
+        this.prisma.fileVersion.create({
+          data: { fileId: existing.id, storageKey: existing.storageKey, size: existing.size },
+        }),
+      ])
+      await this.folders.invalidateFolderStatsCache(dto.folderId)
+      return file
+    }
+
     const file = await this.prisma.file.create({ data: dto })
     await this.folders.invalidateFolderStatsCache(dto.folderId)
     return file

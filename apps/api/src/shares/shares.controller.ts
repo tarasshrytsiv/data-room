@@ -20,6 +20,11 @@ export class SharesController {
     return this.service.findAll(user.id)
   }
 
+  @Get('with-me')
+  findSharedWithMe(@CurrentUser() user: User) {
+    return this.service.findSharedWithMe(user.id)
+  }
+
   @Delete(':id')
   revoke(@Param('id') id: string, @CurrentUser() user: User) {
     return this.service.revoke(id, user.id)

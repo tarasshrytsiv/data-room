@@ -1,11 +1,11 @@
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common'
-import { JwtService } from '@nestjs/jwt'
 import { PrismaService } from '../../prisma/prisma.service'
+import { SupabaseService } from '../../supabase/supabase.service'
 
 @Injectable()
 export class OptionalJwtAuthGuard implements CanActivate {
   constructor(
-    private readonly jwt: JwtService,
+    private readonly supabase: SupabaseService,
     private readonly prisma: PrismaService,
   ) {}
 
@@ -16,19 +16,18 @@ export class OptionalJwtAuthGuard implements CanActivate {
     if (!token) return true
 
     try {
-      const payload = this.jwt.verify<{ sub: string; email: string }>(token, {
-        secret: process.env.SUPABASE_JWT_SECRET,
-      })
+      const { data, error } = await this.supabase.client.auth.getUser(token)
+      if (error || !data.user) return true
 
       const user = await this.prisma.user.upsert({
-        where: { id: payload.sub },
-        create: { id: payload.sub, email: payload.email },
+        where: { id: data.user.id },
+        create: { id: data.user.id, email: data.user.email! },
         update: {},
       })
 
       request.user = user
     } catch {
-      // Invalid token — leave request.user unset and allow through
+      // invalid token — leave request.user unset and allow through
     }
 
     return true

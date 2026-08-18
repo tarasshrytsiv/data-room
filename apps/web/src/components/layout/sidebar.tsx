@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Database, Share2 } from 'lucide-react'
+import { Database, Share2, Inbox } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import { cn } from '@/lib/utils'
@@ -10,6 +10,7 @@ import { cn } from '@/lib/utils'
 const links = [
   { href: '/dashboard', label: 'Data Rooms', icon: Database },
   { href: '/shared-by-me', label: 'Shared by me', icon: Share2 },
+  { href: '/shared-with-me', label: 'Shared with me', icon: Inbox },
 ]
 
 export function Sidebar() {

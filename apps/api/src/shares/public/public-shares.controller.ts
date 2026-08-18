@@ -17,6 +17,11 @@ export class PublicSharesController {
   @All(':token/contents')
   @UseGuards(QueryMethodGuard)
   getSharedContents(@Param('token') token: string) {
-    return this.service.getSharedContent(token)
+    return this.service.getSharedContents(token)
+  }
+
+  @Get(':token/files/:fileId/view-url')
+  getSharedFileViewUrl(@Param('token') token: string, @Param('fileId') fileId: string) {
+    return this.service.getSharedFileViewUrl(token, fileId)
   }
 }

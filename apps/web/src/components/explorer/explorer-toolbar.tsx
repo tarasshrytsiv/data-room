@@ -22,18 +22,21 @@ export function ExplorerToolbar({ folderId, onRefresh, dataRoomId }: Props) {
   async function createFolder() {
     if (!folderName.trim()) return
     setCreating(true)
-    await apiFetch<FolderDto>('/folders', {
-      method: 'POST',
-      body: JSON.stringify({
-        name: folderName.trim(),
-        dataRoomId,
-        ...(folderId ? { parentId: folderId } : {}),
-      }),
-    })
-    setFolderDialog(false)
-    setFolderName('')
-    setCreating(false)
-    onRefresh()
+    try {
+      await apiFetch<FolderDto>('/folders', {
+        method: 'POST',
+        body: JSON.stringify({
+          name: folderName.trim(),
+          dataRoomId,
+          ...(folderId ? { parentId: folderId } : {}),
+        }),
+      })
+      setFolderDialog(false)
+      setFolderName('')
+      onRefresh()
+    } finally {
+      setCreating(false)
+    }
   }
 
   return (

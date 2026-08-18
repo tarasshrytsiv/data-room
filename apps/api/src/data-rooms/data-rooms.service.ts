@@ -38,6 +38,15 @@ export class DataRoomsService {
     return this.prisma.dataRoom.delete({ where: { id } })
   }
 
+  async getRootContents(roomId: string, userId: string) {
+    await this.findOne(roomId, userId)
+    const folders = await this.prisma.folder.findMany({
+      where: { dataRoomId: roomId, parentId: null },
+      orderBy: { createdAt: 'asc' },
+    })
+    return { items: folders }
+  }
+
   async search(roomId: string, dto: SearchDto, userId: string) {
     await this.findOne(roomId, userId)
 

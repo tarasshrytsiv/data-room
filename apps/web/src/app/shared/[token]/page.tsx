@@ -1,52 +1,51 @@
 import { notFound } from 'next/navigation'
-import { ItemGrid } from '@/components/explorer/item-grid'
+import { ReadonlyItemGrid } from '@/components/explorer/readonly-item-grid'
+import { createClient } from '@/lib/supabase/server'
 import type { ShareDto, FolderContentsResponse } from '@repo/types'
 
 type Props = { params: Promise<{ token: string }> }
 
-async function getSharedContent(token: string) {
+async function getAuthHeader(): Promise<Record<string, string>> {
+  const supabase = await createClient()
+  const { data } = await supabase.auth.getSession()
+  if (!data.session?.access_token) return {}
+  return { Authorization: `Bearer ${data.session.access_token}` }
+}
+
+async function getSharedContent(token: string, authHeader: Record<string, string>) {
   const res = await fetch(
     `${process.env.NEXT_PUBLIC_API_URL}/api/v1/shared/${token}`,
-    { cache: 'no-store' },
+    { cache: 'no-store', headers: authHeader },
   )
   if (!res.ok) return null
-  return res.json() as Promise<{ share: ShareDto; isReadOnly: true }>
+  return res.json() as Promise<{ share: ShareDto; isReadOnly: true; viewUrl: string | null }>
 }
 
 export default async function SharedPage({ params }: Props) {
   const { token } = await params
-  const data = await getSharedContent(token)
+  const authHeader = await getAuthHeader()
+  const data = await getSharedContent(token, authHeader)
 
   if (!data) notFound()
 
-  const { share } = data
+  const { share, viewUrl } = data
 
   if (share.fileId) {
-    const fileRes = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/v1/files/${share.fileId}/view-url`,
-      { cache: 'no-store' },
-    )
-    if (!fileRes.ok) notFound()
-    const { url } = await fileRes.json() as { url: string }
+    if (!viewUrl) notFound()
 
     return (
       <div className="flex flex-col h-screen">
         <div className="px-4 py-3 border-b bg-white flex items-center gap-3">
           <span className="text-sm font-semibold text-[var(--color-foreground)]">Data Room — Shared file</span>
         </div>
-        <iframe src={url} className="flex-1 w-full" title="Shared file" />
+        <iframe src={viewUrl} className="flex-1 w-full" title="Shared file" />
       </div>
     )
   }
 
   const contentsRes = await fetch(
     `${process.env.NEXT_PUBLIC_API_URL}/api/v1/shared/${token}/contents`,
-    {
-      method: 'QUERY',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ limit: 50 }),
-      cache: 'no-store',
-    },
+    { method: 'QUERY', headers: { 'Content-Type': 'application/json', ...authHeader }, body: '{}', cache: 'no-store' },
   )
 
   const contents = contentsRes.ok
@@ -62,14 +61,8 @@ export default async function SharedPage({ params }: Props) {
         </h1>
       </div>
 
-      {contents ? (
-        <ItemGrid
-          items={contents.items}
-          roomId=""
-          onView={() => {}}
-          onRefresh={() => {}}
-          readOnly
-        />
+      {contents && contents.items.length > 0 ? (
+        <ReadonlyItemGrid items={contents.items} token={token} />
       ) : (
         <p className="text-sm text-[var(--color-muted-foreground)]">Empty</p>
       )}

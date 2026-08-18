@@ -4,13 +4,13 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common'
-import { JwtService } from '@nestjs/jwt'
 import { PrismaService } from '../../prisma/prisma.service'
+import { SupabaseService } from '../../supabase/supabase.service'
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
   constructor(
-    private readonly jwt: JwtService,
+    private readonly supabase: SupabaseService,
     private readonly prisma: PrismaService,
   ) {}
 
@@ -20,13 +20,12 @@ export class JwtAuthGuard implements CanActivate {
 
     if (!token) throw new UnauthorizedException()
 
-    const payload = this.jwt.verify<{ sub: string; email: string }>(token, {
-      secret: process.env.SUPABASE_JWT_SECRET,
-    })
+    const { data, error } = await this.supabase.client.auth.getUser(token)
+    if (error || !data.user) throw new UnauthorizedException()
 
     const user = await this.prisma.user.upsert({
-      where: { id: payload.sub },
-      create: { id: payload.sub, email: payload.email },
+      where: { id: data.user.id },
+      create: { id: data.user.id, email: data.user.email! },
       update: {},
     })
 

@@ -18,11 +18,15 @@ type Props = {
 export function ExplorerClient({ roomId, folderId, initialData, dataRoomId }: Props) {
   const [viewFile, setViewFile] = useState<FileDto | null>(null)
 
-  const key = folderId ? `/folders/${folderId}/contents` : null
+  const key = folderId
+    ? `/folders/${folderId}/contents`
+    : `/data-rooms/${dataRoomId}/contents`
 
   const { data, mutate } = useSWR<FolderContentsResponse>(
     key,
-    () => apiFetch(key!, { method: 'QUERY', body: JSON.stringify({ limit: 50 }) }),
+    () => folderId
+      ? apiFetch(key, { method: 'QUERY', body: JSON.stringify({ limit: 50 }) })
+      : apiFetch(key),
     { fallbackData: initialData },
   )
 

@@ -40,6 +40,11 @@ export class DataRoomsController {
     return this.service.remove(id, user.id)
   }
 
+  @Get(':id/contents')
+  getRootContents(@Param('id') id: string, @CurrentUser() user: User) {
+    return this.service.getRootContents(id, user.id)
+  }
+
   @All(':id/search')
   @UseGuards(QueryMethodGuard)
   search(@Param('id') id: string, @Body() dto: SearchDto, @CurrentUser() user: User) {

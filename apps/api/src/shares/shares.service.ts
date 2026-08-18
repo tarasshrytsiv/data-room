@@ -1,10 +1,14 @@
 import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common'
 import { PrismaService } from '../prisma/prisma.service'
+import { StorageService } from '../storage/storage.service'
 import { CreateShareDto } from './dto/create-share.dto'
 
 @Injectable()
 export class SharesService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly storage: StorageService,
+  ) {}
 
   async create(dto: CreateShareDto, sharedById: string) {
     if (!dto.dataRoomId && !dto.folderId && !dto.fileId) {
@@ -60,6 +64,19 @@ export class SharesService {
     })
   }
 
+  findSharedWithMe(userId: string) {
+    return this.prisma.share.findMany({
+      where: { sharedWithId: userId, revokedAt: null },
+      orderBy: { createdAt: 'desc' },
+      include: {
+        sharedBy: { select: { email: true } },
+        dataRoom: { select: { name: true } },
+        folder: { select: { name: true } },
+        file: { select: { name: true } },
+      },
+    })
+  }
+
   async revoke(id: string, userId: string) {
     const share = await this.prisma.share.findUnique({ where: { id } })
     if (!share) throw new NotFoundException()
@@ -75,9 +92,54 @@ export class SharesService {
     const share = await this.prisma.share.findUnique({ where: { token } })
     if (!share) throw new NotFoundException()
 
-    return {
-      share,
-      isReadOnly: true,
+    let viewUrl: string | null = null
+    if (share.fileId) {
+      const file = await this.prisma.file.findUnique({ where: { id: share.fileId } })
+      if (file) viewUrl = await this.storage.createViewUrl(file.storageKey)
     }
+
+    return { share, isReadOnly: true, viewUrl }
+  }
+
+  async getSharedContents(token: string) {
+    const share = await this.prisma.share.findUnique({ where: { token } })
+    if (!share) throw new NotFoundException()
+
+    if (share.folderId) {
+      const [folders, files] = await Promise.all([
+        this.prisma.folder.findMany({ where: { parentId: share.folderId }, orderBy: { createdAt: 'asc' } }),
+        this.prisma.file.findMany({ where: { folderId: share.folderId }, orderBy: { createdAt: 'asc' } }),
+      ])
+      return { items: [...folders, ...files] }
+    }
+
+    if (share.dataRoomId) {
+      const folders = await this.prisma.folder.findMany({
+        where: { dataRoomId: share.dataRoomId, parentId: null },
+        orderBy: { createdAt: 'asc' },
+      })
+      return { items: folders }
+    }
+
+    return { items: [] }
+  }
+
+  async getSharedFileViewUrl(token: string, fileId: string) {
+    const share = await this.prisma.share.findUnique({ where: { token } })
+    if (!share) throw new NotFoundException()
+
+    const file = await this.prisma.file.findUnique({ where: { id: fileId } })
+    if (!file) throw new NotFoundException()
+
+    if (share.fileId) {
+      if (share.fileId !== fileId) throw new ForbiddenException()
+    } else if (share.folderId) {
+      if (file.folderId !== share.folderId) throw new ForbiddenException()
+    } else if (share.dataRoomId) {
+      const folder = await this.prisma.folder.findUnique({ where: { id: file.folderId } })
+      if (!folder || folder.dataRoomId !== share.dataRoomId) throw new ForbiddenException()
+    }
+
+    return { viewUrl: await this.storage.createViewUrl(file.storageKey) }
   }
 }
