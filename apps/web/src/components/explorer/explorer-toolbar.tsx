@@ -38,28 +38,32 @@ export function ExplorerToolbar({ folderId, onRefresh, dataRoomId }: Props) {
 
   return (
     <div className="flex items-center gap-2">
-      <Button variant="outline" size="sm" className="cursor-pointer" onClick={() => inputRef.current?.click()}>
-        <Upload size={14} className="mr-2" />
-        Upload
-      </Button>
+      {folderId && (
+        <Button variant="outline" size="sm" className="cursor-pointer" onClick={() => inputRef.current?.click()}>
+          <Upload size={14} className="mr-2" />
+          Upload
+        </Button>
+      )}
       <Button variant="outline" size="sm" className="cursor-pointer" onClick={() => setFolderDialog(true)}>
         <FolderPlus size={14} className="mr-2" />
         New folder
       </Button>
 
-      <input
-        ref={inputRef}
-        type="file"
-        multiple
-        accept="application/pdf"
-        className="sr-only"
-        onChange={(e) => {
-          const files = Array.from(e.target.files ?? [])
-          if (files.length) upload(files)
-          e.target.value = ''
-        }}
-        aria-label="Upload PDF files"
-      />
+      {folderId && (
+        <input
+          ref={inputRef}
+          type="file"
+          multiple
+          accept="application/pdf"
+          className="sr-only"
+          onChange={(e) => {
+            const files = Array.from(e.target.files ?? [])
+            if (files.length) upload(files)
+            e.target.value = ''
+          }}
+          aria-label="Upload PDF files"
+        />
+      )}
 
       <Dialog open={folderDialog} onOpenChange={setFolderDialog}>
         <DialogContent>
@@ -80,7 +84,7 @@ export function ExplorerToolbar({ folderId, onRefresh, dataRoomId }: Props) {
         </DialogContent>
       </Dialog>
 
-      <UploadQueue items={items} />
+      {folderId && <UploadQueue items={items} />}
     </div>
   )
 }

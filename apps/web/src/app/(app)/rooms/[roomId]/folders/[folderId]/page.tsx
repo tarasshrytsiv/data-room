@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
-import { redirect } from 'next/navigation'
+import { redirect, notFound } from 'next/navigation'
 import { ExplorerBreadcrumb } from '@/components/explorer/breadcrumb'
 import { ExplorerServer } from '@/components/explorer/explorer-server'
 
@@ -11,7 +11,7 @@ export default async function FolderPage({ params }: Props) {
   const { data: { session } } = await supabase.auth.getSession()
   if (!session) redirect('/login')
 
-  const data = await fetch(
+  const res = await fetch(
     `${process.env.NEXT_PUBLIC_API_URL}/api/v1/folders/${folderId}/contents`,
     {
       method: 'QUERY',
@@ -22,7 +22,9 @@ export default async function FolderPage({ params }: Props) {
       body: JSON.stringify({ limit: 50 }),
       cache: 'no-store',
     },
-  ).then((r) => r.json())
+  )
+  if (!res.ok) notFound()
+  const data = await res.json()
 
   return (
     <div className="px-8 py-8 max-w-6xl mx-auto">

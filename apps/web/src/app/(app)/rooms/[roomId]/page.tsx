@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
-import { redirect } from 'next/navigation'
+import { redirect, notFound } from 'next/navigation'
 import { ExplorerBreadcrumb } from '@/components/explorer/breadcrumb'
 import { ExplorerServer } from '@/components/explorer/explorer-server'
 
@@ -11,10 +11,12 @@ export default async function RoomPage({ params }: Props) {
   const { data: { session } } = await supabase.auth.getSession()
   if (!session) redirect('/login')
 
-  const room = await fetch(
+  const res = await fetch(
     `${process.env.NEXT_PUBLIC_API_URL}/api/v1/data-rooms/${roomId}`,
     { headers: { Authorization: `Bearer ${session.access_token}` }, cache: 'no-store' },
-  ).then((r) => r.json())
+  )
+  if (!res.ok) notFound()
+  const room = await res.json()
 
   return (
     <div className="px-8 py-8 max-w-6xl mx-auto">

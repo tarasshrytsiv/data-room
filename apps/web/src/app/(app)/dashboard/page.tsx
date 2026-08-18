@@ -7,10 +7,11 @@ export default async function DashboardPage() {
   const supabase = await createClient()
   const { data: { session } } = await supabase.auth.getSession()
 
-  const rooms = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/data-rooms`, {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/data-rooms`, {
     headers: { Authorization: `Bearer ${session?.access_token}` },
     cache: 'no-store',
-  }).then((r) => r.json() as Promise<DataRoomDto[]>)
+  })
+  const rooms: DataRoomDto[] = res.ok ? await res.json() : []
 
   return (
     <div className="px-8 py-8 max-w-6xl mx-auto">

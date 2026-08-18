@@ -19,7 +19,7 @@ type Props = {
   readOnly?: boolean
 }
 
-export function ItemGrid({ items, roomId, onView, readOnly }: Props) {
+export function ItemGrid({ items, roomId, onView, onRefresh, readOnly }: Props) {
   if (items.length === 0) return <EmptyState />
 
   return (
@@ -30,7 +30,7 @@ export function ItemGrid({ items, roomId, onView, readOnly }: Props) {
             key={item.id}
             folder={item}
             roomId={roomId}
-            onAction={() => {}}
+            onAction={onRefresh}
             readOnly={readOnly}
           />
         ) : (
@@ -38,6 +38,7 @@ export function ItemGrid({ items, roomId, onView, readOnly }: Props) {
             key={item.id}
             file={item}
             onView={onView}
+            onAction={onRefresh}
             readOnly={readOnly}
           />
         ),

@@ -19,15 +19,24 @@ export function FolderItem({ folder, roomId, onAction, readOnly }: Props) {
   return (
     <>
       <div className="flex items-center gap-2 p-3 rounded-lg border bg-white hover:shadow-sm transition-all duration-200 group">
-        <Link
-          href={`/rooms/${roomId}/folders/${folder.id}`}
-          className="flex items-center gap-3 flex-1 min-w-0 cursor-pointer"
-        >
-          <Folder size={20} className="text-[var(--color-primary)] shrink-0" />
-          <span className="text-sm font-medium text-[var(--color-foreground)] truncate group-hover:text-[var(--color-primary)] transition-colors duration-150">
-            {folder.name}
-          </span>
-        </Link>
+        {!readOnly && roomId ? (
+          <Link
+            href={`/rooms/${roomId}/folders/${folder.id}`}
+            className="flex items-center gap-3 flex-1 min-w-0 cursor-pointer"
+          >
+            <Folder size={20} className="text-[var(--color-primary)] shrink-0" />
+            <span className="text-sm font-medium text-[var(--color-foreground)] truncate group-hover:text-[var(--color-primary)] transition-colors duration-150">
+              {folder.name}
+            </span>
+          </Link>
+        ) : (
+          <div className="flex items-center gap-3 flex-1 min-w-0">
+            <Folder size={20} className="text-[var(--color-primary)] shrink-0" />
+            <span className="text-sm font-medium text-[var(--color-foreground)] truncate">
+              {folder.name}
+            </span>
+          </div>
+        )}
         {!readOnly && (
           <DropdownMenu>
             <DropdownMenuTrigger
