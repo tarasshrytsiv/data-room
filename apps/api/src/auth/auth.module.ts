@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common'
+import { Global, Module } from '@nestjs/common'
 import { JwtModule } from '@nestjs/jwt'
 import { JwtAuthGuard } from './guards/jwt-auth.guard'
 import { OptionalJwtAuthGuard } from './guards/optional-jwt-auth.guard'
@@ -7,6 +7,7 @@ import { QueryMethodGuard } from './guards/query-method.guard'
 import { ShareAccessGuard } from './guards/share-access.guard'
 import { AuthController } from './controllers/auth.controller'
 
+@Global()
 @Module({
   imports: [JwtModule.register({})],
   controllers: [AuthController],
