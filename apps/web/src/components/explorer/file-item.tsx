@@ -5,6 +5,7 @@ import { FileText, MoreVertical } from 'lucide-react'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { RenameDialog } from '@/components/modals/rename-dialog'
 import { DeleteConfirmDialog } from '@/components/modals/delete-confirm-dialog'
+import { MoveFileDialog } from '@/components/modals/move-file-dialog'
 import { ShareDialog } from '@/components/share/share-dialog'
 import type { FileDto } from '@repo/types'
 
@@ -13,6 +14,7 @@ type Props = {
   onView: (file: FileDto) => void
   onAction?: () => void
   readOnly?: boolean
+  roomId?: string
 }
 
 function formatBytes(bytes: number): string {
@@ -21,10 +23,11 @@ function formatBytes(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
 }
 
-export function FileItem({ file, onView, onAction, readOnly }: Props) {
+export function FileItem({ file, onView, onAction, readOnly, roomId }: Props) {
   const [renaming, setRenaming] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [sharing, setSharing] = useState(false)
+  const [moving, setMoving] = useState(false)
 
   return (
     <>
@@ -50,6 +53,7 @@ export function FileItem({ file, onView, onAction, readOnly }: Props) {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem className="cursor-pointer" onClick={() => setRenaming(true)}>Rename</DropdownMenuItem>
+              {roomId && <DropdownMenuItem className="cursor-pointer" onClick={() => setMoving(true)}>Move</DropdownMenuItem>}
               <DropdownMenuItem className="cursor-pointer" onClick={() => setSharing(true)}>Share</DropdownMenuItem>
               <DropdownMenuItem className="cursor-pointer" variant="destructive" onClick={() => setDeleting(true)}>Delete</DropdownMenuItem>
             </DropdownMenuContent>
@@ -78,6 +82,15 @@ export function FileItem({ file, onView, onAction, readOnly }: Props) {
         onClose={() => setSharing(false)}
         target={{ type: 'file', id: file.id }}
       />
+      {roomId && (
+        <MoveFileDialog
+          open={moving}
+          onClose={() => setMoving(false)}
+          onSuccess={() => onAction?.()}
+          file={file}
+          roomId={roomId}
+        />
+      )}
     </>
   )
 }

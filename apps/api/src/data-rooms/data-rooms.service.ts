@@ -47,6 +47,15 @@ export class DataRoomsService {
     return { items: folders }
   }
 
+  async getAllFolders(roomId: string, userId: string) {
+    await this.findOne(roomId, userId)
+    return this.prisma.folder.findMany({
+      where: { dataRoomId: roomId },
+      orderBy: { name: 'asc' },
+      select: { id: true, name: true, parentId: true },
+    })
+  }
+
   async search(roomId: string, dto: SearchDto, userId: string) {
     await this.findOne(roomId, userId)
 

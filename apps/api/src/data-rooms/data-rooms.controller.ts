@@ -45,6 +45,11 @@ export class DataRoomsController {
     return this.service.getRootContents(id, user.id)
   }
 
+  @Get(':id/folders')
+  getAllFolders(@Param('id') id: string, @CurrentUser() user: User) {
+    return this.service.getAllFolders(id, user.id)
+  }
+
   @All(':id/search')
   @UseGuards(QueryMethodGuard)
   search(@Param('id') id: string, @Body() dto: SearchDto, @CurrentUser() user: User) {

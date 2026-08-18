@@ -40,6 +40,7 @@ export function ItemGrid({ items, roomId, onView, onRefresh, readOnly }: Props) 
             onView={onView}
             onAction={onRefresh}
             readOnly={readOnly}
+            roomId={readOnly ? undefined : roomId}
           />
         ),
       )}
